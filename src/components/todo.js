@@ -12,7 +12,16 @@
 //sol menü küçültülebilir olsun
 //üst barlara da public ders ve testleri koyarım
 
-
+// üst menüde Public testler ders adlarına göre sıralı bulunsun (Puan yok ve süre sınırı yok)
+// sol menüde öğrencinin bulunduğu gruplar ve altında ise dersler bulunsun
+// drawer içinde çözdüğü testler, gruplar(isim olarak ve üstüne tıklandığında öteki katılımcıları görür)
+// drawer içinde çalışma süresi (bir iki database güncellemesi gerekebilir)
+// drawer içinde çözdüğü teste tıkladığında test cevaplarıyla birlikte fakat değiştirelemeyecek şekilde görüntülensin
+// öğrenci için başka bir şey yok
+// kayıt olmadan devam eden birinde sağ üstte draver olarak misafir yazsın fakat drawer açılmayacak
+// bu misafirin sol kısmında menüsü olmayacak ve sadece üst taraftaki public testleri görüntüleyecek
+// öğretmen menüsü biraz daha farklı olacak çünkü öğrenci gruba katılma istekleri vs olacak bunu daha sonra düşüneceğim şimdilik
+// misafir ve öğrenci kısmı bitmeli
 
 
 
