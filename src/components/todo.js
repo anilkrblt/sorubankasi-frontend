@@ -23,8 +23,41 @@
 // öğretmen menüsü biraz daha farklı olacak çünkü öğrenci gruba katılma istekleri vs olacak bunu daha sonra düşüneceğim şimdilik
 // misafir ve öğrenci kısmı bitmeli
 
+// öğretmen menüsü de şu şekilde olsun:
+// sol tarafta gruplar ve grupların altında hazırladığı testler olsun
+// öğretmen farklı gruplara katılabilir fakat farklı grupların testlerini düzenleyemez
+// kendi oluşturduğu grubun testini zaten kendi oluşturmuş olacağı için
+// o testleri düzenleyebilir ve kimlerin o testleri çözdüğünü görebilir
+// çözenlerin neleri işaretlediğini de görebilir
+// yani sol kısımda gruplar menüsü her menü altında o gruptaki testler görünür. drawer içinde de grup oluşturma
+// gruba öğrenci ekleme, grupları görüntüleme, gruplardaki öğrencileri görüntüleme ve sınav ekleme kısımlarını kurgulayacağım
 
 
+import { addExam } from './api';
 
+// Örnek veri
+const examData = {
+  ders_kodu: "BIL342",
+  ders_adi: "Bilgisayar Ağları",
+  test_adi: "Final Sınavı",
+  sorular: [
+    // Soruların detayları
+  ],
+  sinav_suresi: 60,
+  grup_id: "6672a73c3ca25605e2cdcdfa"
+};
+
+// Kullanıcı bilgileri
+const email = "kullanici@example.com";
+const password = "kullanici_sifresi";
+
+// Sınav ekleme işlemi
+addExam(examData, email, password)
+  .then(response => {
+    console.log("Exam added:", response);
+  })
+  .catch(error => {
+    console.error("Error adding exam:", error);
+  });
 
 
