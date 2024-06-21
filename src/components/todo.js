@@ -32,6 +32,13 @@
 // yani sol kısımda gruplar menüsü her menü altında o gruptaki testler görünür. drawer içinde de grup oluşturma
 // gruba öğrenci ekleme, grupları görüntüleme, gruplardaki öğrencileri görüntüleme ve sınav ekleme kısımlarını kurgulayacağım
 
+// üst menüye bir corousel eklenecek drawer menüsünün tasarımıyla biraz oynanacak
+// bazı buglar çözülecek 
+// bazı görsel buglar çözülecek
+// sınav görüntüleme yerinin tasarımı üzerinde oynanacak
+// soru bankası yerine belki marka adı ve üstüne de bir tane logo güzel olabilir
+// öğrenci için gruba katıl eklenecek
+// şimdi öğretmen için tasarıma başlıyorum
 
 import { addExam } from './api';
 

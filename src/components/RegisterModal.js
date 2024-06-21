@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Form, Input, Button, Select } from "antd";
+import { registerUser } from "../services/apiService";
 
 const RegisterModal = ({
   isVisible,
@@ -33,7 +34,7 @@ const RegisterModal = ({
       >
         <Form.Item
           name="username"
-          rules={[{ required: true, message: "Lütfen kullanıcı adınızı giriniz!!" }]}
+          rules={[{ required: true, message: "Lütfen kullanıcı adınızı giriniz!" }]}
         >
           <Input placeholder="Kullanıcı Adı" />
         </Form.Item>
@@ -43,10 +44,10 @@ const RegisterModal = ({
         >
           <Input.Password placeholder="Şifre" />
         </Form.Item>
-        <Form.Item name="name">
+        <Form.Item name="firstName">
           <Input placeholder="Ad" />
         </Form.Item>
-        <Form.Item name="surname">
+        <Form.Item name="lastName">
           <Input placeholder="Soyad" />
         </Form.Item>
         <Form.Item
@@ -79,7 +80,7 @@ const RegisterModal = ({
 
         {userRole === "teacher" && (
           <Form.Item
-            name="telephoneNumber"
+            name="tel_no"
             rules={[{ required: true, message: "Lütfen telefon numaranızı giriniz!" }]}
           >
             <Input placeholder="Telefon Numarası" />

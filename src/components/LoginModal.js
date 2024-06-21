@@ -1,18 +1,7 @@
 import React from "react";
 import { Modal, Form, Input, Button } from "antd";
 
-const LoginModal = ({
-  isVisible,
-  handleOk,
-  handleCancel,
-  onFinish,
-  onFinishFailed,
-}) => {
-  function onSubmit(e){
-    e.preventDefault()
-    console.log(e.target.value)
-
-  }
+const LoginModal = ({ isVisible, handleOk, handleCancel, onFinish }) => {
   return (
     <Modal
       title="Giriş Yap"
@@ -24,15 +13,13 @@ const LoginModal = ({
       <Form
         name="login"
         initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        onSubmitCapture={onSubmit}
+        onFinish={onFinish} // onFinish fonksiyonu burada kullanılacak
       >
         <Form.Item
-          name="username"
-          rules={[{ required: true, message: "Lütfen geçerli bir kullanıcı adı giriniz!" }]}
+          name="email"
+          rules={[{ required: true, message: "Lütfen geçerli bir e-posta giriniz!" }]}
         >
-          <Input placeholder="Kullanıcı Adı/E-posta" />
+          <Input placeholder="E-posta" />
         </Form.Item>
         <Form.Item
           name="password"
