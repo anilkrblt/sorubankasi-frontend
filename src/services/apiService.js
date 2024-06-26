@@ -13,6 +13,7 @@ export const fetchPublicData = async () => {
   }
 };
 export const createGroup = async (groupData) => {
+  console.log(groupData);
   try {
     const response = await axios.post(`${API_URL}/groups`, groupData, {
       withCredentials: true,
@@ -22,7 +23,7 @@ export const createGroup = async (groupData) => {
     console.error("Error creating group:", error);
     throw error;
   }
-}
+};
 export const login = async (credentials) => {
   try {
     const response = await axios.post(`${API_URL}/auth/login`, credentials, {
@@ -64,12 +65,10 @@ export const logout = async () => {
   }
 };
 
-
 export const createExam = async (examData) => {
+  console.log(examData);
   try {
-    const response = await axios.post(`${API_URL}/exams`, examData, {
-      withCredentials: true,
-    });
+    const response = await axios.post(`${API_URL}/exams`, examData);
     return response.data;
   } catch (error) {
     console.error("Error creating exam:", error);
@@ -91,26 +90,6 @@ export const addExam = async (examData, email, password) => {
   }
 };
 
-
-export const updateExam = async (examId, updatedData, email, password) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/exams/${examId}`,
-      updatedData,
-      {
-        headers: {
-          email,
-          password,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-
 export const deleteExam = async (examId, email, password) => {
   try {
     const response = await axios.delete(`${API_URL}/exams/${examId}`, {
@@ -125,7 +104,6 @@ export const deleteExam = async (examId, email, password) => {
   }
 };
 
-
 export const addGroup = async (groupData, email, password) => {
   try {
     const response = await axios.post(`${API_URL}/groups`, groupData, {
@@ -139,7 +117,6 @@ export const addGroup = async (groupData, email, password) => {
     throw error;
   }
 };
-
 
 export const addStudentToGroup = async (
   groupId,
@@ -164,7 +141,6 @@ export const addStudentToGroup = async (
   }
 };
 
-
 export const removeStudentFromGroup = async (
   groupId,
   studentId,
@@ -188,7 +164,6 @@ export const removeStudentFromGroup = async (
   }
 };
 
-
 export const deleteGroup = async (groupId, email, password) => {
   try {
     const response = await axios.delete(`${API_URL}/groups/${groupId}`, {
@@ -202,7 +177,6 @@ export const deleteGroup = async (groupId, email, password) => {
     throw error;
   }
 };
-
 
 export const updateGroup = async (groupId, updatedData, email, password) => {
   try {
@@ -222,50 +196,63 @@ export const updateGroup = async (groupId, updatedData, email, password) => {
   }
 };
 export const updateUserProfile = async (userData) => {
-    try {
-      const response = await axios.put(`${API_URL}/auth/update-profile`, userData, { withCredentials: true });
-      return response.data;
-    } catch (error) {
-      console.error("Profile update error:", error.response ? error.response.data : 'Network error');
-      throw error;
-    }
-  };
+  try {
+    const response = await axios.put(
+      `${API_URL}/auth/update-profile`,
+      userData,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Profile update error:",
+      error.response ? error.response.data : "Network error"
+    );
+    throw error;
+  }
+};
 
-  export const submitExam = async (examId, answers) => {
-    const userId = localStorage.getItem('userId');
-    console.log('Exam ID:', examId);
-    console.log('Answers:', answers);
-    console.log('User ID:', userId);
-  
-    // Cevapları array formatına çevir
-    const formattedAnswers = Object.entries(answers).map(([answerId, answer]) => ({
+export const submitExam = async (examId, answers) => {
+  const userId = localStorage.getItem("userId");
+  console.log("Exam ID:", examId);
+  console.log("Answers:", answers);
+  console.log("User ID:", userId);
+
+  const formattedAnswers = Object.entries(answers).map(
+    ([answerId, answer]) => ({
       answerId,
-      answer
-    }));
-  
-    try {
-      const response = await axios.post(
-        `${API_URL}/exams/submit`,
-        {
-          examId,
-          answers: formattedAnswers,
-          userId,
+      answer,
+    })
+  );
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/exams/submit`,
+      {
+        examId,
+        answers: formattedAnswers,
+        userId,
+      },
+      {
+        withCredentials: true,
+        headers: {
+          Authorization:
+            "Basic " +
+            btoa(
+              localStorage.getItem("email") +
+                ":" +
+                localStorage.getItem("password")
+            ),
         },
-        {
-          withCredentials: true,
-          headers: {
-            'Authorization': 'Basic ' + btoa(localStorage.getItem('email') + ':' + localStorage.getItem('password'))
-          }
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error submitting exam:", error);
-      throw error;
-    }
-  };
-  
-  
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting exam:", error);
+    throw error;
+  }
+};
+
 export const fetchUserGroups = async () => {
   try {
     const response = await axios.get(`${API_URL}/auth/user-groups`, {
@@ -283,7 +270,7 @@ export const deleteUser = async (user_id) => {
   try {
     const response = await axios.post(
       `${API_URL}/auth/delete-account`,
-      {user_id},
+      { user_id },
       { withCredentials: true }
     );
     return response.data;
@@ -329,3 +316,61 @@ export const updatePassword = async (oldPassword, newPassword) => {
     throw error;
   }
 };
+
+export const updateStudentExamScore = async (studentNo, examId, score) => {
+  try {
+    const response = await axios.put(`${API_URL}/students/update-exam-score`, {
+      studentNo,
+      examId,
+      score,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Puan güncellemede hata:",
+      error.response ? error.response.data : error
+    );
+    throw error;
+  }
+};
+
+export const fetchUserExams = async (examIds) => {
+  console.log(examIds);
+  try {
+    const queryString = examIds.join(",");
+    const response = await axios.get(`${API_URL}/exams/get-exams`, {
+      params: {
+        examIds: queryString,
+      },
+      withCredentials: true,
+    });
+    return response;
+  } catch (error) {
+    console.error(
+      "Sınav çekmede hata",
+      error.response ? error.response.data : "Ağ hatası"
+    );
+    throw error;
+  }
+};
+
+
+
+export const updateExam = async (exam) => {
+  const examId = exam._id;
+  const newQuestions = exam.sorular;
+  const sinav_suresi = exam.sinav_suresi;
+
+  try {
+    const response = await axios.put(`${API_URL}/exams/update-exam`, {
+      examId,
+      newQuestions,
+      sinav_suresi
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Sınav güncellenirken bir hata oluştu:", error);
+    throw error;
+  }
+};
+

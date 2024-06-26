@@ -14,14 +14,13 @@ import {
   Dropdown,
   Button,
   Space,
-  Carousel,
   theme,
   message,
   Modal,
   Form,
   Input,
   Select,
-} from "antd"; // Modal, Form, Input, Select eklendi
+} from "antd";
 import RegisterModal from "./components/RegisterModal";
 import LoginModal from "./components/LoginModal";
 import UserDrawer from "./components/UserDrawer";
@@ -32,12 +31,12 @@ import {
   login,
   logout,
   registerUser,
-  createGroup, // Yeni API fonksiyonu
+  createGroup,
 } from "./services/apiService";
 import "./App.css";
 
 const { Header, Content, Sider, Footer } = Layout;
-const { Option } = Select; // Select için Option
+const { Option } = Select;
 
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -54,9 +53,9 @@ const App = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isExamInProgress, setIsExamInProgress] = useState(false);
   const [isGroupModalVisible, setIsGroupModalVisible] = useState(false);
-  const [form] = Form.useForm(); // Form instance
+  const [form] = Form.useForm();
   const [isExamModalVisible, setIsExamModalVisible] = useState(false);
-  const [examForm] = Form.useForm(); // Exam form instance
+  const [examForm] = Form.useForm();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -81,14 +80,15 @@ const App = () => {
       const response = await login(values);
       console.log(response.user);
       setUser(response.user);
+      console.log(response);
       setUserGroups(response.user.groups);
       localStorage.setItem("userId", response.user._id);
       localStorage.setItem("email", values.email);
       localStorage.setItem("password", values.password);
-      message.success("Login successful");
+      message.success("Login Giriş başarılı!");
       setLoginModalVisible(false);
     } catch (error) {
-      message.error("Login failed. Please check your credentials.");
+      message.error("Giriş yapılamadı.");
     }
   };
 
@@ -207,7 +207,7 @@ const App = () => {
 
   const handleRegister = async (values) => {
     try {
-      const response = await registerUser(values);
+     await registerUser(values);
       message.success("Kayıt başarılı. Lütfen giriş yapın.");
       setRegisterModalVisible(false);
     } catch (error) {
@@ -227,60 +227,6 @@ const App = () => {
     );
   };
 
-  const generateCarouselItems = () => {
-    const groupedExams = publicExams.reduce((acc, exam) => {
-      if (!acc[exam.ders_kodu]) {
-        acc[exam.ders_kodu] = {
-          dersAdi: exam.ders_adi,
-          sinavlar: [],
-        };
-      }
-      acc[exam.ders_kodu].sinavlar.push(exam);
-      return acc;
-    }, {});
-
-    return (
-      <Carousel autoplay>
-        {Object.keys(groupedExams).map((key) => {
-          const ders = groupedExams[key];
-          const isSelected = selectedCourse === key;
-          return (
-            <div key={key} style={{ padding: "0 10px", textAlign: "center" }}>
-              <Dropdown
-                overlay={
-                  <Menu>
-                    {ders.sinavlar.map((sinav, index) => (
-                      <Menu.Item
-                        key={`${key}-${index}`}
-                        onClick={() => handleExamSelection(sinav)}
-                      >
-                        {sinav.test_adi}
-                      </Menu.Item>
-                    ))}
-                  </Menu>
-                }
-                trigger={["click"]}
-              >
-                <Button
-                  type="text"
-                  style={{
-                    color: "#fff",
-                    backgroundColor: isSelected ? "#0050b3" : "transparent",
-                    borderRadius: "8px",
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                  }}
-                >
-                  {ders.dersAdi} <DownOutlined />
-                </Button>
-              </Dropdown>
-            </div>
-          );
-        })}
-      </Carousel>
-    );
-  };
-
   const getItem = (label, key, icon, children) => {
     return {
       key,
@@ -290,7 +236,6 @@ const App = () => {
     };
   };
 
-  // Grup Ekleme Fonksiyonu
   const handleGroupCreation = async (values) => {
     try {
       const response = await createGroup({
@@ -299,50 +244,55 @@ const App = () => {
         uyeler: values.students.map((student) => ({
           ogrenci_no: student,
         })),
-        olusturan_id: user._id, // Grubu oluşturan kullanıcı
+        olusturan_id: user._id,
         type: values.groupType,
       });
 
-      // Yeni grup eklendikten sonra kullanıcı gruplarını yeniden fetch et
       setUserGroups((prev) => [...prev, response.group]);
 
       message.success("Grup başarıyla oluşturuldu.");
       setIsGroupModalVisible(false);
-      form.resetFields(); // Formu sıfırla
+      form.resetFields();
     } catch (error) {
       message.error("Grup oluşturulurken bir hata oluştu.");
     }
   };
 
   const handleExamCreation = async (values) => {
-    try {
-      const response = await createExam({
-        ders_kodu: values.courseCode,
-        ders_adi: values.courseName,
-        test_adi: values.testName,
-        sorular: values.questions.map((question) => ({
-          soru_tipi: question.type,
-          soru_metni: question.text,
-          cevaplar: question.answers ? question.answers : [],
-          dogru_cevap: question.correctAnswer ? question.correctAnswer : "",
-          puan: question.points,
-        })),
-        sinav_suresi: values.duration,
-        hazirlayan_id: user._id,
-        type: values.testType,
-      });
+    const examData = {
+      type: values.testType,
+      ders_kodu: values.courseCode,
+      ders_adi: values.courseName,
+      test_adi: values.testName,
+      sorular: values.questions.map((question) => ({
+        soru_tipi: question.type,
+        soru_metni: question.text,
+        cevaplar: question.answers ? question.answers : [],
+        dogru_cevap: question.correctAnswer ? question.correctAnswer : "",
+        puan: question.points,
+      })),
+      sinav_suresi: values.duration,
+      grup_id:
+        values.groupId && values.groupId.length > 0 ? values.groupId[0] : null,
+      hazirlayan_id: user._id,
+    };
 
-      // Yeni sınav eklendikten sonra sınavları yeniden fetch et
+    try {
+      const response = await createExam(examData);
       setPublicExams((prev) => [...prev, response.exam]);
 
       message.success("Sınav başarıyla oluşturuldu.");
       setIsExamModalVisible(false);
-      examForm.resetFields(); // Formu sıfırla
+      examForm.resetFields();
     } catch (error) {
       message.error("Sınav oluşturulurken bir hata oluştu.");
     }
   };
 
+  const onProfileUpdate = async (updatedUser) => {
+    setUser(updatedUser);
+    setUserDrawerVisible(false);
+  };
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header
@@ -352,11 +302,10 @@ const App = () => {
           backgroundColor: "#001529",
         }}
       >
-        <div className="logo" style={{ color: "#fff", marginRight: "40px" }}>
-          Soru Bankası
+        <div className="logo" style={{ color: "#fff", marginRight: "100px" }}>
+          sa
         </div>
 
-        
         <Space size="large" style={{ flex: 1 }}>
           {generateMenuItems()}
         </Space>
@@ -381,16 +330,7 @@ const App = () => {
                   </Button>
                 </>
               )}
-              <Dropdown
-                overlay={
-                  <Menu>
-                    <Menu.Item key="logout" onClick={handleLogout}>
-                      Çıkış Yap
-                    </Menu.Item>
-                  </Menu>
-                }
-                trigger={["click"]}
-              >
+              <Dropdown overlay={<></>} trigger={["click"]}>
                 <Button
                   type="text"
                   style={{ color: "#fff" }}
@@ -400,14 +340,12 @@ const App = () => {
                 </Button>
               </Dropdown>
               <UserDrawer
+                setUserGroups
                 visible={userDrawerVisible}
                 onClose={() => setUserDrawerVisible(false)}
                 user={user}
                 onLogout={handleLogout}
-                onProfileUpdate={(updatedUser) => {
-                  setUser(updatedUser);
-                  setUserDrawerVisible(false);
-                }}
+                onProfileUpdate={onProfileUpdate}
               />
             </>
           ) : (
@@ -470,7 +408,7 @@ const App = () => {
             onExamFinish={() => setIsExamInProgress(false)}
           />
           <Footer style={{ textAlign: "center" }}>
-            Ant Design ©{new Date().getFullYear()} Created by Anıl Karabulut
+            Soru Bank ©{new Date().getFullYear()} Created by Anıl Karabulut
           </Footer>
         </Layout>
       </Layout>
@@ -486,10 +424,9 @@ const App = () => {
         handleOk={() => setLoginModalVisible(false)}
         onFinish={handleLogin}
       />
-      {/* Grup Ekleme Modalı */}
       <Modal
         title="Yeni Grup Ekle"
-        visible={isGroupModalVisible}
+        open={isGroupModalVisible}
         onCancel={() => setIsGroupModalVisible(false)}
         onOk={() => form.submit()}
         okText="Ekle"
@@ -528,30 +465,33 @@ const App = () => {
           <Form.List name="students">
             {(fields, { add, remove }) => (
               <>
-                {fields.map((field) => (
-                  <Form.Item
-                    {...field}
-                    label="Öğrenci Numarası"
-                    key={field.key}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Öğrenci numarasını giriniz.",
-                      },
-                    ]}
+                {fields.map(({ key, name, fieldKey, ...restField }) => (
+                  <div
+                    key={key}
+                    style={{ display: "flex", alignItems: "center" }}
                   >
-                    <Input
-                      placeholder="Öğrenci numarasını giriniz"
-                      style={{ width: "80%", marginRight: 8 }}
-                    />
-                    <Button
-                      danger
-                      type="link"
-                      onClick={() => remove(field.name)}
+                    <Form.Item
+                      {...restField}
+                      name={[name, "studentNumber"]}
+                      fieldKey={[fieldKey, "studentNumber"]}
+                      label="Öğrenci Numarası"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Öğrenci numarasını giriniz.",
+                        },
+                      ]}
+                      style={{ flex: 1 }}
                     >
+                      <Input
+                        placeholder="Öğrenci numarasını giriniz"
+                        style={{ marginRight: 8 }}
+                      />
+                    </Form.Item>
+                    <Button danger type="link" onClick={() => remove(name)}>
                       Kaldır
                     </Button>
-                  </Form.Item>
+                  </div>
                 ))}
                 <Form.Item>
                   <Button type="dashed" onClick={() => add()}>
@@ -564,7 +504,7 @@ const App = () => {
         </Form>
       </Modal>
       <Modal
-        title="Yeni Test Ekle"
+        title="Yeni Sınav Ekle"
         visible={isExamModalVisible}
         onCancel={() => setIsExamModalVisible(false)}
         onOk={() => examForm.submit()}
@@ -606,7 +546,7 @@ const App = () => {
             rules={[{ required: true, message: "Test türünü seçiniz." }]}
           >
             <Select placeholder="Test türünü seçiniz.">
-              <Option value="public">Genel</Option>
+              <Option value="public">Açık</Option>
               <Option value="private">Özel</Option>
             </Select>
           </Form.Item>
@@ -626,7 +566,6 @@ const App = () => {
                       <Select placeholder="Soru türünü seçiniz.">
                         <Option value="test">Test</Option>
                         <Option value="klasik">Klasik</Option>
-                        <Option value="kod">Kod</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item

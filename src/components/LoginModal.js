@@ -13,7 +13,7 @@ const LoginModal = ({ isVisible, handleOk, handleCancel, onFinish }) => {
       <Form
         name="login"
         initialValues={{ remember: true }}
-        onFinish={onFinish} // onFinish fonksiyonu burada kullanılacak
+        onFinish={onFinish} 
       >
         <Form.Item
           name="email"

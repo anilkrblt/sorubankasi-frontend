@@ -1,16 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Drawer, Button, Form, Input, List, message, Modal } from "antd";
 import {
   updatePassword,
   updateUserProfile,
   deleteUser,
+  fetchUserExams,
+  updateStudentExamScore,
 } from "../services/apiService";
+import UserInfo from "./UserInfo";
+import ExamPreview from "./ExamPreview";
+
 const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [previewExam, setPreviewExam] = useState(null); // Ön izleme yapılacak sınavı saklar
+  const [previewExam, setPreviewExam] = useState(null);
+  const [localUser, setLocalUser] = useState(user);
+  const [allExam, setAllExam] = useState([]);
+  const [solversModalVisible, setSolversModalVisible] = useState(false);
+  const [currentSolvers, setCurrentSolvers] = useState([]);
+  const [editingSolver, setEditingSolver] = useState(null);
+  useEffect(() => {
+    const getFullExams = async (examIds) => {
+      try {
+        const response = await fetchUserExams(examIds);
+        console.log(response.data.exams);
+        setAllExam(response.data.exams);
+      } catch (error) {
+        console.error("Sınavları çekerken bir hata oluştu:", error);
+      }
+    };
+
+    if (user && user.hazirlanan_sinavlar) {
+      getFullExams(user.hazirlanan_sinavlar);
+    }
+  }, []);
+
+  useEffect(() => {
+    setLocalUser(user);
+  }, [user]);
 
   const handlePasswordUpdate = async (values) => {
     console.log(values);
@@ -28,20 +57,16 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
     try {
       const updatedUser = await updateUserProfile(values);
       message.success("Profil bilgileri başarıyla güncellendi.");
+      setLocalUser(updatedUser);
       onProfileUpdate(updatedUser);
       setIsEditingProfile(false);
-      form.resetFields();
     } catch (error) {
       message.error("Profil güncellenirken bir hata oluştu.");
     }
   };
 
   const handleDeleteUser = async (values) => {
-    // Öğrenciler için `values.user._id`, öğretmenler için `values._id` kullanılır
     const user_id = values.user?._id || values._id;
-
-    console.log("Kullanıcı ID'si:", user_id);
-
     Modal.confirm({
       title: "Hesabınızı silmek istediğinizden emin misiniz?",
       content: "Bu işlem geri alınamaz.",
@@ -58,6 +83,80 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
     });
   };
 
+  const handleSolversButtonClick = (solvers) => {
+    setCurrentSolvers(solvers);
+    setSolversModalVisible(true);
+  };
+
+  const handleSaveScores = async (solver) => {
+    const totalScore = solver.cozum.sorular.reduce((total, question) => {
+      return total + (parseInt(question.puan, 10) || 0);
+    }, 0);
+
+    try {
+      await updateStudentExamScore(
+        solver.ogrenci_no,
+        solver.cozum.examId,
+        totalScore
+      );
+
+      const updatedSolvers = currentSolvers.map((s) => {
+        if (s.ogrenci_no === solver.ogrenci_no) {
+          return {
+            ...s,
+            cozum: {
+              ...s.cozum,
+              puan: totalScore,
+            },
+          };
+        }
+        return s;
+      });
+
+      setCurrentSolvers(updatedSolvers);
+
+      const updatedExams = allExam.map((exam) => {
+        if (exam._id === solver.cozum.examId) {
+          const updatedCozenler = exam.cozenler.map((cozen) => {
+            if (cozen.ogrenci_no === solver.ogrenci_no) {
+              return {
+                ...cozen,
+                cozum: {
+                  ...cozen.cozum,
+                  puan: totalScore,
+                },
+              };
+            }
+            return cozen;
+          });
+          return {
+            ...exam,
+            cozenler: updatedCozenler,
+          };
+        }
+        return exam;
+      });
+
+      setAllExam(updatedExams);
+      message.success(`${solver.ad} ${solver.soyad} puanları kaydedildi.`);
+    } catch (error) {
+      message.error("Puanlar kaydedilirken bir hata oluştu.");
+    }
+  };
+
+  const handleSaveExam = (updatedExam) => {
+    const updatedExams = allExam.map((exam) => {
+      if (exam._id === updatedExam._id) {
+        return updatedExam;
+      }
+      return exam;
+    });
+
+    setAllExam(updatedExams);
+    setPreviewExam(updatedExam);
+  };
+
+
   return (
     <Drawer
       title="Kullanıcı Profili"
@@ -66,18 +165,7 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
       open={visible}
       width={300}
     >
-      <p>
-        <strong>Kullanıcı Adı:</strong> {user.kullanici_adi}
-      </p>
-      <p>
-        <strong>Rol:</strong> {user.role}
-      </p>
-      <p>
-        <strong>E-posta:</strong> {user.email}
-      </p>
-      <p>
-        <strong>Ad</strong> {user.ad}
-      </p>
+      <UserInfo user={localUser} />
 
       <Button
         onClick={() => setIsEditingProfile(true)}
@@ -220,24 +308,26 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
           {previewExam && (
             <Modal
               title={`${previewExam.ders_kodu} - ${previewExam.sinav_adi}`}
-              visible={true}
+              open={true}
               onCancel={() => setPreviewExam(null)}
               footer={null}
             >
-              <List
-                dataSource={previewExam.sorular}
-                renderItem={(question, index) => (
-                  <List.Item key={question.soru_id}>
-                    <h4>{question.soru_metni}</h4>
-                    <p>
-                      <strong>Cevabınız: </strong>
-                      {previewExam.cevaplar[index] === undefined
-                        ? ""
-                        : previewExam.cevaplar[index].answer}
-                    </p>
-                  </List.Item>
-                )}
-              />
+              <div>
+                <List
+                  dataSource={previewExam.sorular}
+                  renderItem={(question, index) => (
+                    <List.Item key={question.soru_id}>
+                      <h4>{question.soru_metni}</h4>
+                      <p>
+                        <strong>Cevabınız: </strong>
+                        {previewExam.cevaplar[index] === undefined
+                          ? ""
+                          : previewExam.cevaplar[index].answer}
+                      </p>
+                    </List.Item>
+                  )}
+                />
+              </div>
             </Modal>
           )}
         </>
@@ -247,7 +337,7 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
         <>
           <h3 style={{ marginTop: 24 }}>Hazırlanan Sınavlar</h3>
           <List
-            dataSource={user.hazirlanan_sinavlar}
+            dataSource={allExam}
             renderItem={(exam) => (
               <List.Item key={exam._id}>
                 <div>
@@ -255,53 +345,115 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
                   <Button onClick={() => setPreviewExam(exam)}>
                     Görüntüle
                   </Button>
+                  <Button
+                    onClick={() => handleSolversButtonClick(exam.cozenler)}
+                    style={{ marginLeft: 8 }}
+                  >
+                    Çözenler
+                  </Button>
                 </div>
               </List.Item>
             )}
           />
           {previewExam && (
-            <Modal
-              title={`${previewExam.ders_kodu} - ${previewExam.test_adi}`}
-              visible={true}
-              onCancel={() => setPreviewExam(null)}
-              footer={null}
-            >
-              <p>
-                <strong>Sınav Süresi:</strong> {previewExam.sinav_suresi} dakika
-              </p>
-              <List
-                dataSource={previewExam.sorular}
-                renderItem={(question, index) => (
-                  <List.Item key={question.soru_id}>
-                    <h4>{question.soru_metni}</h4>
-                    <p>
-                      <strong>Soru Tipi:</strong> {question.soru_tipi}
-                    </p>
-                    {question.soru_tipi === "test" && (
-                      <>
-                        <p>
-                          <strong>Şıklar:</strong>
-                        </p>
-                        <ul>
-                          {question.cevaplar.map((cevap, idx) => (
-                            <li key={idx}>{cevap}</li>
-                          ))}
-                        </ul>
-                        <p>
-                          <strong>Doğru Cevap:</strong> {question.dogru_cevap}
-                        </p>
-                      </>
-                    )}
-                    <p>
-                      <strong>Puan:</strong> {question.puan}
-                    </p>
-                  </List.Item>
-                )}
-              />
-            </Modal>
+            <ExamPreview
+              previewExam={previewExam}
+              setPreviewExam={setPreviewExam}
+              onSave={handleSaveExam}
+            ></ExamPreview>
           )}
         </>
       )}
+
+      <Modal
+        title="Sınavı Çözen Öğrenciler"
+        open={solversModalVisible}
+        onCancel={() => setSolversModalVisible(false)}
+        footer={null}
+      >
+        <List
+          dataSource={currentSolvers}
+          renderItem={(solver) => (
+            <List.Item key={solver.ogrenci_no}>
+              <div>
+                {editingSolver?.ogrenci_no === solver.ogrenci_no ? (
+                  <>
+                    <List
+                      dataSource={solver.cozum.sorular}
+                      renderItem={(question, index) => (
+                        <List.Item
+                          key={question.soru_id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div>
+                            <h4>{question.soru_metni}</h4>
+                            <p>
+                              <strong>Cevap:</strong>{" "}
+                              {solver.cozum.cevaplar[index].answer}
+                            </p>
+                          </div>
+                          <Form.Item label="Puan" style={{ marginBottom: 0 }}>
+                            <Input
+                              type="number"
+                              defaultValue={question.puan}
+                              onChange={(e) => {
+                                const newSolvers = [...currentSolvers];
+                                newSolvers.forEach((s) => {
+                                  if (s.ogrenci_no === solver.ogrenci_no) {
+                                    s.cozum.sorular[index].puan =
+                                      e.target.value;
+                                  }
+                                });
+                                setCurrentSolvers(newSolvers);
+                              }}
+                            />
+                          </Form.Item>
+                        </List.Item>
+                      )}
+                    />
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        handleSaveScores(solver);
+                        setEditingSolver(null);
+                      }}
+                      style={{ marginTop: 16 }}
+                    >
+                      Kaydet
+                    </Button>
+                    <Button
+                      onClick={() => setEditingSolver(null)}
+                      style={{ marginTop: 16, marginLeft: 8 }}
+                    >
+                      İptal
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <strong>
+                        {solver.ad} {solver.soyad}
+                      </strong>{" "}
+                      - {solver.ogrenci_no} - {solver.cozum.ders_kodu} -{" "}
+                      {solver.cozum.sinav_adi} - Puan: {solver.cozum.puan}
+                    </p>
+                    <Button
+                      onClick={() => setEditingSolver(solver)}
+                      style={{ marginTop: 16 }}
+                    >
+                      Düzenle
+                    </Button>
+                  </>
+                )}
+              </div>
+            </List.Item>
+          )}
+        />
+      </Modal>
     </Drawer>
   );
 };
