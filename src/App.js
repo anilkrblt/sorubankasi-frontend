@@ -6,7 +6,7 @@ import {
   UserAddOutlined,
   LoginOutlined,
   UserOutlined,
-  PlusOutlined, // Yeni ikon
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
   Layout,
@@ -35,7 +35,7 @@ import {
 } from "./services/apiService";
 import "./App.css";
 
-const { Header, Content, Sider, Footer } = Layout;
+const { Header, Sider, Footer } = Layout;
 const { Option } = Select;
 
 const App = () => {
@@ -58,7 +58,7 @@ const App = () => {
   const [examForm] = Form.useForm();
 
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const App = () => {
         setPublicGroups(data.publicGroups);
         setPublicExams(data.publicExams);
       } catch (error) {
-        console.error("Error fetching public data:", error);
+        console.error("Veriler gelirken bir hata oluştu!:", error);
       }
     };
 
@@ -207,7 +207,7 @@ const App = () => {
 
   const handleRegister = async (values) => {
     try {
-     await registerUser(values);
+      await registerUser(values);
       message.success("Kayıt başarılı. Lütfen giriş yapın.");
       setRegisterModalVisible(false);
     } catch (error) {
@@ -294,7 +294,7 @@ const App = () => {
     setUserDrawerVisible(false);
   };
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: "100vh"}}>
       <Header
         style={{
           display: "flex",
@@ -302,8 +302,8 @@ const App = () => {
           backgroundColor: "#001529",
         }}
       >
-        <div className="logo" style={{ color: "#fff", marginRight: "100px" }}>
-          sa
+        <div className="logo" style={{ color: "#fff", marginRight: "60px" }}>
+        <strong>Soru Bankası</strong> 
         </div>
 
         <Space size="large" style={{ flex: 1 }}>
@@ -424,6 +424,7 @@ const App = () => {
         handleOk={() => setLoginModalVisible(false)}
         onFinish={handleLogin}
       />
+      {/* Grup Ekleme */}
       <Modal
         title="Yeni Grup Ekle"
         open={isGroupModalVisible}
@@ -503,6 +504,7 @@ const App = () => {
           </Form.List>
         </Form>
       </Modal>
+      {/* Sınav ekleme */}
       <Modal
         title="Yeni Sınav Ekle"
         visible={isExamModalVisible}

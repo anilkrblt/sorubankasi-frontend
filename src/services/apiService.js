@@ -1,4 +1,3 @@
-// apiService.js
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api";
@@ -76,125 +75,7 @@ export const createExam = async (examData) => {
   }
 };
 
-export const addExam = async (examData, email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/exams`, examData, {
-      headers: {
-        email,
-        password,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
 
-export const deleteExam = async (examId, email, password) => {
-  try {
-    const response = await axios.delete(`${API_URL}/exams/${examId}`, {
-      headers: {
-        email,
-        password,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const addGroup = async (groupData, email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/groups`, groupData, {
-      headers: {
-        email,
-        password,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const addStudentToGroup = async (
-  groupId,
-  studentId,
-  email,
-  password
-) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/groups/${groupId}/add-student`,
-      { studentId },
-      {
-        headers: {
-          email,
-          password,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const removeStudentFromGroup = async (
-  groupId,
-  studentId,
-  email,
-  password
-) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/groups/${groupId}/remove-student`,
-      { studentId },
-      {
-        headers: {
-          email,
-          password,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const deleteGroup = async (groupId, email, password) => {
-  try {
-    const response = await axios.delete(`${API_URL}/groups/${groupId}`, {
-      headers: {
-        email,
-        password,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const updateGroup = async (groupId, updatedData, email, password) => {
-  try {
-    const response = await axios.put(
-      `${API_URL}/groups/${groupId}`,
-      updatedData,
-      {
-        headers: {
-          email,
-          password,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
 export const updateUserProfile = async (userData) => {
   try {
     const response = await axios.put(
@@ -253,18 +134,6 @@ export const submitExam = async (examId, answers) => {
   }
 };
 
-export const fetchUserGroups = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/auth/user-groups`, {
-      withCredentials: true,
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching user groups:", error);
-    throw error;
-  }
-};
 
 export const deleteUser = async (user_id) => {
   try {
@@ -283,22 +152,6 @@ export const deleteUser = async (user_id) => {
   }
 };
 
-export const updateProfile = async (profileData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/auth/update-profile`,
-      profileData,
-      { withCredentials: true }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Profile update error:",
-      error.response ? error.response.data : "Network error"
-    );
-    throw error;
-  }
-};
 
 export const updatePassword = async (oldPassword, newPassword) => {
   try {
@@ -353,8 +206,6 @@ export const fetchUserExams = async (examIds) => {
     throw error;
   }
 };
-
-
 
 export const updateExam = async (exam) => {
   const examId = exam._id;

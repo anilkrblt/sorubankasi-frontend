@@ -14,7 +14,7 @@ const ContentArea = ({
   onExamStart,
   onExamFinish,
 }) => {
-  const [timeRemaining, setTimeRemaining] = useState(60); // 60 dakika varsayılan süre
+  const [timeRemaining, setTimeRemaining] = useState(60); 
   const [intervalId, setIntervalId] = useState(null);
 
   const handleStartExam = () => {
@@ -59,6 +59,7 @@ const ContentArea = ({
         minHeight: 280,
         background: "white",
         borderRadius: 8,
+        backgroundColor: "#F9F1F0" 
       }}
     >
       {examId ? (

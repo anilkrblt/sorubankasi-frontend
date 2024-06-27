@@ -18,7 +18,7 @@ const ExamPreviewModal = ({ previewExam, setPreviewExam, onSave }) => {
         message.success("Sınav başarıyla güncellendi.");
         setEditModalVisible(false);
         setPreviewExam(editingExam);
-        onSave(editingExam); // Update parent state
+        onSave(editingExam); 
       } catch (error) {
         message.error("Sınav güncellenirken bir hata oluştu.");
       }
@@ -48,7 +48,7 @@ const ExamPreviewModal = ({ previewExam, setPreviewExam, onSave }) => {
             Sınavı Düzenle
           </Button>,
         ]}
-        width={800} // Modal boyutunu genişlettik
+        width={800} 
         bodyStyle={{ padding: "20px" }}
       >
         <div>
@@ -120,8 +120,8 @@ const ExamPreviewModal = ({ previewExam, setPreviewExam, onSave }) => {
               Kaydet
             </Button>,
           ]}
-          width={800} // Modal boyutunu genişlettik
-          bodyStyle={{ padding: "20px" }} // İçerik boşluğunu artırdık
+          width={800} 
+          bodyStyle={{ padding: "20px" }} 
         >
           <div>
             <Form layout="vertical">

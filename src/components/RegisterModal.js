@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Modal, Form, Input, Button, Select } from "antd";
-import { registerUser } from "../services/apiService";
 
 const RegisterModal = ({
   isVisible,
@@ -9,10 +8,10 @@ const RegisterModal = ({
   onFinish,
   onFinishFailed,
 }) => {
-  const [userRole, setUserRole] = useState("student"); // Varsayılan rol olarak 'student' seçili
+  const [userRole, setUserRole] = useState("student"); 
 
   const onRoleChange = value => {
-    setUserRole(value); // Kullanıcının seçtiği rolü güncelle
+    setUserRole(value); 
   };
 
   return (
@@ -27,7 +26,7 @@ const RegisterModal = ({
         name="register"
         initialValues={{
           remember: true,
-          role: "student" // İlk değer olarak öğrenci seçili
+          role: "student" 
         }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}

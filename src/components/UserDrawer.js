@@ -156,7 +156,6 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
     setPreviewExam(updatedExam);
   };
 
-
   return (
     <Drawer
       title="Kullanıcı Profili"
@@ -164,31 +163,26 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
       onClose={onClose}
       open={visible}
       width={300}
+      style= {
+        {backgroundColor: "#F9F1F0"}
+      }
     >
       <UserInfo user={localUser} />
-
-      <Button
-        onClick={() => setIsEditingProfile(true)}
-        style={{ marginTop: 16 }}
-      >
-        Profili Düzenle
-      </Button>
-      <Button
-        onClick={() => setIsEditingPassword(true)}
-        style={{ marginTop: 8 }}
-      >
-        Şifre Güncelle
-      </Button>
-      <Button
-        onClick={() => handleDeleteUser(user)}
-        style={{ marginTop: 8 }}
-        danger
-      >
-        Hesabı Sil
-      </Button>
-      <Button onClick={onLogout} style={{ marginTop: 8 }} danger>
-        Çıkış Yap
-      </Button>
+      <hr />
+      <div style={{ display: "flex", alignContent: "space-between" }}>
+        <Button
+          onClick={() => setIsEditingProfile(true)}
+          style={{ marginTop: 16 }}
+        >
+          Profili Düzenle
+        </Button>
+        <Button
+          onClick={() => setIsEditingPassword(true)}
+          style={{ marginTop: 16 }}
+        >
+          Şifre Güncelle
+        </Button>
+      </div>
 
       {isEditingProfile && (
         <Form
@@ -295,15 +289,26 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
             dataSource={user.cozulen_sinavlar}
             renderItem={(exam) => (
               <List.Item key={exam.ders_kodu + exam.sinav_adi}>
-                <div>
-                  <p>{`${exam.ders_kodu} - ${exam.sinav_adi}`}</p>
-                  <Button onClick={() => setPreviewExam(exam)}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <span>{`${exam.ders_kodu} - ${exam.sinav_adi}`}</span>
+                  <Button
+                    type="default"
+                    onClick={() => setPreviewExam(exam)}
+                    style={{ marginLeft: "auto" }}
+                  >
                     Görüntüle
-                  </Button>{" "}
-                  {/* Tıklanınca sınavı setPreviewExam ile ayarla */}
+                  </Button>
                 </div>
               </List.Item>
             )}
+            style={{ margin: "0 auto", width: "90%" }} 
           />
           {previewExam && (
             <Modal
@@ -311,17 +316,31 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
               open={true}
               onCancel={() => setPreviewExam(null)}
               footer={null}
+              width={800}
+              bodyStyle={{ padding: "20px" }}
             >
               <div>
                 <List
                   dataSource={previewExam.sorular}
                   renderItem={(question, index) => (
-                    <List.Item key={question.soru_id}>
-                      <h4>{question.soru_metni}</h4>
-                      <p>
+                    <List.Item
+                      key={question.soru_id}
+                      style={{
+                        display: "block",
+                        marginBottom: "20px",
+                        padding: "15px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "8px",
+                        background: "#f9f9f9",
+                      }}
+                    >
+                      <h4 style={{ marginBottom: "8px" }}>
+                        {question.soru_metni}
+                      </h4>
+                      <p style={{ marginBottom: "8px" }}>
                         <strong>Cevabınız: </strong>
                         {previewExam.cevaplar[index] === undefined
-                          ? ""
+                          ? "Cevaplanmamış"
                           : previewExam.cevaplar[index].answer}
                       </p>
                     </List.Item>
@@ -454,6 +473,51 @@ const UserDrawer = ({ visible, onClose, user, onLogout, onProfileUpdate }) => {
           )}
         />
       </Modal>
+      <Button
+        onClick={() => handleDeleteUser(user)}
+        style={{
+          marginTop: 8,
+          width: "200px",
+          marginLeft: "10px",
+          background: "white",
+          border: "1px solid red",
+          color: "red",
+        }}
+        danger
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "red";
+          e.currentTarget.style.color = "white";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "white";
+          e.currentTarget.style.color = "red";
+        }}
+      >
+        Hesabı Sil
+      </Button>
+      <br />
+      <Button
+        onClick={onLogout}
+        style={{
+          marginTop: 8,
+          width: "200px",
+          marginLeft: "10px",
+          background: "white",
+          border: "1px solid red",
+          color: "red",
+        }}
+        danger
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "red";
+          e.currentTarget.style.color = "white";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "white";
+          e.currentTarget.style.color = "red";
+        }}
+      >
+        Çıkış Yap
+      </Button>
     </Drawer>
   );
 };

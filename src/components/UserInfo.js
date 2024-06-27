@@ -1,4 +1,3 @@
-// UserInfo.js
 import React from 'react';
 
 const UserInfo = ({ user }) => (
